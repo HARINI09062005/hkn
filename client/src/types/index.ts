@@ -48,6 +48,7 @@ export interface Deadline {
     status: 'upcoming' | 'completed' | 'overdue';
     notes?: string;
     createdAt: number;
+    source: 'admin_event' | 'chapter';
 }
 
 export interface Category {

@@ -13,6 +13,7 @@ import * as z from 'zod';
 import toast from 'react-hot-toast';
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay } from 'date-fns';
 import clsx from 'clsx';
+import { Deadline } from '../types';
 
 const deadlineSchema = z.object({
     title: z.string().min(1, 'Title is required'),
@@ -29,6 +30,11 @@ const Deadlines: React.FC = () => {
     const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [deadlineFilter, setDeadlineFilter] = useState<'admin' | 'chapter'>('admin');
+
+    const sortedDeadlines = [...deadlines].sort((a, b) => a.dueDate - b.dueDate);
+    const adminDeadlines = sortedDeadlines.filter((d) => d.source === 'admin_event');
+    const chapterDeadlines = sortedDeadlines.filter((d) => d.source !== 'admin_event');
 
     const {
         register,
@@ -43,12 +49,13 @@ const Deadlines: React.FC = () => {
     });
 
     const onSubmit = (data: DeadlineFormData) => {
-        const newDeadline = {
+        const newDeadline: Deadline = {
             id: `deadline-${Date.now()}`,
             ...data,
             dueDate: new Date(data.dueDate).getTime() / 1000,
             status: 'upcoming' as const,
             createdAt: Date.now() / 1000,
+            source: 'chapter',
         };
         addDeadline(newDeadline);
         toast.success('Deadline added successfully');
@@ -74,6 +81,67 @@ const Deadlines: React.FC = () => {
         }
     };
 
+    const renderDeadlineCard = (deadline: Deadline) => {
+        const daysRemaining = Math.ceil((deadline.dueDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24));
+        const isOverdue = daysRemaining < 0 && deadline.status !== 'completed';
+        const priorityVariant =
+            deadline.priority === 'high' ? 'danger' : deadline.priority === 'medium' ? 'warning' : 'info';
+
+        return (
+            <Card key={deadline.id} className={clsx("transition-all hover:shadow-md", deadline.status === 'completed' && "opacity-75")}>
+                <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4">
+                        <button
+                            onClick={() => toggleStatus(deadline.id, deadline.status)}
+                            className={clsx(
+                                "mt-1 transition-colors",
+                                deadline.status === 'completed' ? "text-status-success" : "text-text-muted hover:text-primary-blue"
+                            )}
+                        >
+                            {deadline.status === 'completed' ? <CheckCircle size={24} /> : <div className="w-6 h-6 rounded-full border-2 border-current" />}
+                        </button>
+                        <div>
+                            <h3 className={clsx("text-lg font-semibold text-text-primary", deadline.status === 'completed' && "line-through text-text-secondary")}>
+                                {deadline.title}
+                            </h3>
+                            <div className="flex items-center space-x-4 mt-1 text-sm text-text-secondary">
+                                <span className={clsx("flex items-center", isOverdue ? "text-status-danger font-medium" : "")}>
+                                    <Clock size={16} className="mr-1" />
+                                    {format(new Date(deadline.dueDate * 1000), 'MMM d, yyyy')}
+                                    <span className="ml-1">
+                                        ({daysRemaining > 0 ? `${daysRemaining} days left` : daysRemaining === 0 ? 'Due today' : 'Overdue'})
+                                    </span>
+                                </span>
+                                {deadline.amount && (
+                                    <span className="flex items-center">
+                                        <AlertCircle size={16} className="mr-1" />
+                                        ${deadline.amount.toLocaleString()}
+                                    </span>
+                                )}
+                            </div>
+                            {deadline.notes && <p className="mt-2 text-sm text-text-secondary">{deadline.notes}</p>}
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end space-y-2">
+                        <div className="flex flex-wrap justify-end gap-2">
+                            <Badge variant={priorityVariant}>{deadline.priority} Priority</Badge>
+                            <Badge variant={deadline.source === 'admin_event' ? 'info' : 'default'}>
+                                {deadline.source === 'admin_event' ? 'Admin Event' : 'Chapter Deadline'}
+                            </Badge>
+                        </div>
+                        {deadline.source === 'admin_event' ? (
+                            <span className="text-xs text-text-secondary">Managed by admin</span>
+                        ) : (
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(deadline.id)} className="text-status-danger hover:bg-status-danger/10">
+                                Delete
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </Card>
+        );
+    };
+
     const renderCalendar = () => {
         const monthStart = startOfMonth(currentDate);
         const monthEnd = endOfMonth(currentDate);
@@ -82,8 +150,20 @@ const Deadlines: React.FC = () => {
 
         return (
             <div className="bg-bg-card border border-border rounded-xl overflow-hidden">
-                <div className="p-4 border-b border-border flex justify-between items-center">
-                    <h2 className="font-heading font-semibold text-lg">{format(currentDate, 'MMMM yyyy')}</h2>
+                <div className="p-4 border-b border-border flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 className="font-heading font-semibold text-lg">{format(currentDate, 'MMMM yyyy')}</h2>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-text-secondary">
+                            <span className="inline-flex items-center gap-1">
+                                <span className="w-3 h-3 rounded-full bg-primary-blue" />
+                                Admin Event
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                                <span className="w-3 h-3 rounded-full bg-status-warning" />
+                                Chapter Deadline
+                            </span>
+                        </div>
+                    </div>
                     <div className="flex space-x-2">
                         <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}>Prev</Button>
                         <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>Today</Button>
@@ -116,10 +196,14 @@ const Deadlines: React.FC = () => {
                                         <div
                                             key={d.id}
                                             className={clsx(
-                                                "text-xs p-1 rounded truncate cursor-pointer",
-                                                d.priority === 'high' ? 'bg-status-danger/10 text-status-danger' :
-                                                    d.priority === 'medium' ? 'bg-status-warning/10 text-status-warning' :
-                                                        'bg-status-info/10 text-status-info'
+                                                "text-xs p-1 rounded border truncate cursor-pointer",
+                                                d.source === 'admin_event'
+                                                    ? 'bg-primary-blue/10 text-primary-blue border-primary-blue/30'
+                                                    : d.priority === 'high'
+                                                        ? 'bg-status-danger/10 text-status-danger border-status-danger/20'
+                                                        : d.priority === 'medium'
+                                                            ? 'bg-status-warning/10 text-status-warning border-status-warning/20'
+                                                            : 'bg-status-info/10 text-status-info border-status-info/20'
                                             )}
                                             title={d.title}
                                         >
@@ -134,6 +218,25 @@ const Deadlines: React.FC = () => {
             </div>
         );
     };
+
+    const listSections = {
+        admin: {
+            title: 'Admin Event Deadlines',
+            description: 'Official event reminders shared by the admin team.',
+            emptyText: 'No admin deadlines at the moment.',
+            items: adminDeadlines,
+            badgeVariant: 'info' as const,
+        },
+        chapter: {
+            title: 'Existing Chapter Deadlines',
+            description: 'Track chapter-specific tasks you and your team add.',
+            emptyText: 'No chapter deadlines yet. Use "Add Deadline" to create one.',
+            items: chapterDeadlines,
+            badgeVariant: 'default' as const,
+        },
+    };
+
+    const activeSection = listSections[deadlineFilter];
 
     return (
         <div className="space-y-6">
@@ -167,66 +270,50 @@ const Deadlines: React.FC = () => {
             </div>
 
             {viewMode === 'list' ? (
-                <div className="space-y-4">
-                    {deadlines.sort((a, b) => a.dueDate - b.dueDate).map((deadline) => {
-                        const daysRemaining = Math.ceil((deadline.dueDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24));
-                        const isOverdue = daysRemaining < 0 && deadline.status !== 'completed';
+                <div className="space-y-6">
+                    <div className="bg-bg-card border border-border rounded-lg p-1 flex w-full md:w-auto">
+                        <button
+                            className={clsx(
+                                "flex-1 px-4 py-2 rounded transition-colors text-sm font-medium",
+                                deadlineFilter === 'admin'
+                                    ? "bg-bg-secondary text-primary-blue"
+                                    : "text-text-secondary hover:text-text-primary"
+                            )}
+                            onClick={() => setDeadlineFilter('admin')}
+                        >
+                            Admin Deadlines
+                        </button>
+                        <button
+                            className={clsx(
+                                "flex-1 px-4 py-2 rounded transition-colors text-sm font-medium",
+                                deadlineFilter === 'chapter'
+                                    ? "bg-bg-secondary text-primary-blue"
+                                    : "text-text-secondary hover:text-text-primary"
+                            )}
+                            onClick={() => setDeadlineFilter('chapter')}
+                        >
+                            My Deadlines
+                        </button>
+                    </div>
 
-                        return (
-                            <Card key={deadline.id} className={clsx("transition-all hover:shadow-md", deadline.status === 'completed' && "opacity-75")}>
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-start space-x-4">
-                                        <button
-                                            onClick={() => toggleStatus(deadline.id, deadline.status)}
-                                            className={clsx(
-                                                "mt-1 transition-colors",
-                                                deadline.status === 'completed' ? "text-status-success" : "text-text-muted hover:text-primary-blue"
-                                            )}
-                                        >
-                                            {deadline.status === 'completed' ? <CheckCircle size={24} /> : <div className="w-6 h-6 rounded-full border-2 border-current" />}
-                                        </button>
-                                        <div>
-                                            <h3 className={clsx("text-lg font-semibold text-text-primary", deadline.status === 'completed' && "line-through text-text-secondary")}>
-                                                {deadline.title}
-                                            </h3>
-                                            <div className="flex items-center space-x-4 mt-1 text-sm text-text-secondary">
-                                                <span className={clsx("flex items-center", isOverdue ? "text-status-danger font-medium" : "")}>
-                                                    <Clock size={16} className="mr-1" />
-                                                    {format(new Date(deadline.dueDate * 1000), 'MMM d, yyyy')}
-                                                    <span className="ml-1">
-                                                        ({daysRemaining > 0 ? `${daysRemaining} days left` : daysRemaining === 0 ? 'Due today' : 'Overdue'})
-                                                    </span>
-                                                </span>
-                                                {deadline.amount && (
-                                                    <span className="flex items-center">
-                                                        <AlertCircle size={16} className="mr-1" />
-                                                        ${deadline.amount.toLocaleString()}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {deadline.notes && <p className="mt-2 text-sm text-text-secondary">{deadline.notes}</p>}
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col items-end space-y-2">
-                                        <Badge variant={
-                                            deadline.priority === 'high' ? 'danger' :
-                                                deadline.priority === 'medium' ? 'warning' : 'info'
-                                        }>
-                                            {deadline.priority} Priority
-                                        </Badge>
-                                        <Button variant="ghost" size="sm" onClick={() => handleDelete(deadline.id)} className="text-status-danger hover:bg-status-danger/10">
-                                            Delete
-                                        </Button>
-                                    </div>
-                                </div>
-                            </Card>
-                        );
-                    })}
-                    {deadlines.length === 0 && (
-                        <div className="text-center py-12 text-text-muted">
-                            No deadlines found. Add one to get started.
+                    <section className="space-y-4">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 className="text-xl font-heading font-semibold text-text-primary">{activeSection.title}</h2>
+                                <p className="text-sm text-text-secondary">{activeSection.description}</p>
+                            </div>
+                            <Badge variant={activeSection.badgeVariant}>{activeSection.items.length} items</Badge>
                         </div>
-                    )}
+                        {activeSection.items.length > 0 ? (
+                            <div className="space-y-4">
+                                {activeSection.items.map(renderDeadlineCard)}
+                            </div>
+                        ) : (
+                            <div className="text-center py-10 border border-dashed border-border rounded-xl text-text-muted">
+                                {activeSection.emptyText}
+                            </div>
+                        )}
+                    </section>
                 </div>
             ) : (
                 renderCalendar()

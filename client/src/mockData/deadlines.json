@@ -7,7 +7,8 @@
         "priority": "high",
         "status": "upcoming",
         "notes": "Submit proposal for hackathon funding",
-        "createdAt": 1693526400
+        "createdAt": 1693526400,
+        "source": "admin_event"
     },
     {
         "id": "deadline-002",
@@ -16,7 +17,8 @@
         "priority": "medium",
         "status": "upcoming",
         "notes": "Submit final report for the academic year",
-        "createdAt": 1693526400
+        "createdAt": 1693526400,
+        "source": "admin_event"
     },
     {
         "id": "deadline-003",
@@ -26,6 +28,7 @@
         "priority": "high",
         "status": "completed",
         "notes": "Pay deposit for the workshop venue",
-        "createdAt": 1693526400
+        "createdAt": 1693526400,
+        "source": "chapter"
     }
 ]
