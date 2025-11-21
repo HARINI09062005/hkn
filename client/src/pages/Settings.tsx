@@ -1,13 +1,16 @@
 import React from 'react';
 import { User, Bell, Moon } from 'lucide-react';
+import clsx from 'clsx';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import Select from '../components/common/Select';
 import { useAppContext } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Settings: React.FC = () => {
     const { state } = useAppContext();
+    const { theme, toggleTheme } = useTheme();
     const { currentUser } = state;
 
     return (
@@ -93,9 +96,25 @@ const Settings: React.FC = () => {
                                     <p className="text-sm text-text-secondary">Toggle dark mode theme</p>
                                 </div>
                             </div>
-                            <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full bg-bg-secondary border border-border cursor-pointer">
-                                <span className="translate-x-0 inline-block w-6 h-6 transform bg-white rounded-full shadow-sm transition duration-200 ease-in-out" />
-                            </div>
+                            <button
+                                type="button"
+                                onClick={toggleTheme}
+                                aria-pressed={theme === 'dark'}
+                                className={clsx(
+                                    'relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue',
+                                    theme === 'dark'
+                                        ? 'bg-primary-blue text-white'
+                                        : 'bg-bg-secondary border border-border'
+                                )}
+                            >
+                                <span
+                                    className={clsx(
+                                        'inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-300 ease-in-out',
+                                        theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                                    )}
+                                />
+                                <span className="sr-only">Toggle dark mode</span>
+                            </button>
                         </div>
 
                         <div className="flex items-center justify-between">

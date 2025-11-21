@@ -61,7 +61,7 @@ const AboutHKNSection: React.FC = () => {
                         // @ts-ignore
                         className="lg:w-1/2 relative"
                     >
-                        <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-border bg-white p-8">
+                        <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-border bg-bg-card p-8">
                             <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
                                 <div className="text-center">
                                     <h3 className="text-4xl font-bold text-primary-blue mb-2">IEEE-HKN</h3>
@@ -70,11 +70,11 @@ const AboutHKNSection: React.FC = () => {
                             </div>
 
                             {/* Floating Stats */}
-                            <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-border">
+                            <div className="absolute -bottom-6 -left-6 bg-bg-card p-4 rounded-xl shadow-lg border border-border">
                                 <p className="text-2xl font-bold text-primary-blue">260+</p>
                                 <p className="text-xs text-text-secondary font-medium">Chapters Worldwide</p>
                             </div>
-                            <div className="absolute -top-6 -right-6 bg-white p-4 rounded-xl shadow-lg border border-border">
+                            <div className="absolute -top-6 -right-6 bg-bg-card p-4 rounded-xl shadow-lg border border-border">
                                 <p className="text-2xl font-bold text-accent-purple">1904</p>
                                 <p className="text-xs text-text-secondary font-medium">Founded</p>
                             </div>

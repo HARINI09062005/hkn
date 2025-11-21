@@ -31,7 +31,7 @@ const ScreenshotSection: React.FC = () => {
                         </div>
                         <div className="aspect-[16/9] bg-bg-secondary/30 flex items-center justify-center">
                             <div className="text-center p-8">
-                                <div className="w-full max-w-3xl mx-auto h-64 bg-white rounded-lg shadow-sm border border-border mb-4 flex items-center justify-center">
+                                <div className="w-full max-w-3xl mx-auto h-64 bg-bg-card rounded-lg shadow-sm border border-border mb-4 flex items-center justify-center">
                                     <span className="text-text-muted font-medium">Main Dashboard View</span>
                                 </div>
                                 <p className="text-text-secondary">Intuitive dashboard with real-time insights</p>
@@ -49,7 +49,7 @@ const ScreenshotSection: React.FC = () => {
                         className="absolute top-1/4 -left-12 lg:left-0 w-1/3 hidden md:block z-0 transform -rotate-6 hover:rotate-0 transition-transform duration-500"
                     >
                         <div className="rounded-lg overflow-hidden shadow-xl border border-border bg-bg-card">
-                            <div className="aspect-[4/3] bg-white flex items-center justify-center">
+                            <div className="aspect-[4/3] bg-bg-card flex items-center justify-center">
                                 <span className="text-xs text-text-muted">Budget Details</span>
                             </div>
                         </div>
@@ -64,7 +64,7 @@ const ScreenshotSection: React.FC = () => {
                         className="absolute bottom-1/4 -right-12 lg:right-0 w-1/3 hidden md:block z-20 transform rotate-6 hover:rotate-0 transition-transform duration-500"
                     >
                         <div className="rounded-lg overflow-hidden shadow-xl border border-border bg-bg-card">
-                            <div className="aspect-[4/3] bg-white flex items-center justify-center">
+                            <div className="aspect-[4/3] bg-bg-card flex items-center justify-center">
                                 <span className="text-xs text-text-muted">Timeline Tracker</span>
                             </div>
                         </div>

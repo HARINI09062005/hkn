@@ -1,5 +1,8 @@
+const withOpacityValue = (variable) => `rgb(var(${variable}) / <alpha-value>)`;
+
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,29 +11,29 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    blue: '#2563eb',
-                    dark: '#1e40af',
+                    blue: withOpacityValue('--color-primary-blue'),
+                    dark: withOpacityValue('--color-primary-dark'),
                 },
                 accent: {
-                    purple: '#7c3aed',
+                    purple: withOpacityValue('--color-accent-purple'),
                 },
                 bg: {
-                    primary: '#ffffff',
-                    secondary: '#f8fafc',
-                    card: '#ffffff',
+                    primary: withOpacityValue('--color-bg-primary'),
+                    secondary: withOpacityValue('--color-bg-secondary'),
+                    card: withOpacityValue('--color-bg-card'),
                 },
                 status: {
-                    success: '#10b981',
-                    warning: '#f59e0b',
-                    danger: '#ef4444',
-                    info: '#3b82f6',
+                    success: withOpacityValue('--color-status-success'),
+                    warning: withOpacityValue('--color-status-warning'),
+                    danger: withOpacityValue('--color-status-danger'),
+                    info: withOpacityValue('--color-status-info'),
                 },
                 text: {
-                    primary: '#0f172a',
-                    secondary: '#64748b',
-                    muted: '#94a3b8',
+                    primary: withOpacityValue('--color-text-primary'),
+                    secondary: withOpacityValue('--color-text-secondary'),
+                    muted: withOpacityValue('--color-text-muted'),
                 },
-                border: '#e2e8f0',
+                border: withOpacityValue('--color-border'),
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],

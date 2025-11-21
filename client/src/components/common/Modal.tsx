@@ -48,7 +48,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidt
                         >
                             <Dialog.Panel
                                 className={clsx(
-                                    'w-full transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all',
+                                    'w-full transform overflow-hidden rounded-2xl bg-bg-card p-6 text-left align-middle shadow-xl transition-all',
                                     maxWidthClasses[maxWidth]
                                 )}
                             >
